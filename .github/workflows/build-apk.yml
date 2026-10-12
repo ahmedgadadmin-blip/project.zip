@@ -17,7 +17,9 @@ jobs:
 
       - name: Extract Project Zip
         run: |
-          unzip -q SuperMarket_Fawry_App_Project_LocalDB.zip -d extracted_project
+          ZIP_FILE=$(ls *.zip | head -n 1)
+          echo "Found zip file: $ZIP_FILE"
+          unzip -q "$ZIP_FILE" -d extracted_project
           cp -r extracted_project/* ./
 
       - name: Set up JDK 17
