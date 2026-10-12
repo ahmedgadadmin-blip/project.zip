@@ -1,42 +1,39 @@
-name: Build SuperMarket Fawry APK
+name: Build Android APK
 
 on:
-  workflow_dispatch:
   push:
-    branches: [ "main" ]
-
-permissions:
-  contents: read
+    branches:
+      - main
+      - master
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Download project
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Extract project ZIP
+      - name: Extract Project Zip
         run: |
-          unzip -q SuperMarket_Fawry_AutoPDF_Invoices.zip -d project
+          unzip -q SuperMarket_Fawry_App_Project_LocalDB.zip -d extracted_project
+          cp -r extracted_project/* ./
 
-      - name: Setup Java
+      - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
-          distribution: temurin
+          distribution: 'zulu'
           java-version: '17'
 
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+      - name: Make gradlew executable
+        run: chmod +x gradlew
 
-      - name: Build APK
-        run: |
-          cd project
-          gradle assembleDebug
+      - name: Build Debug APK
+        run: ./gradlew assembleDebug
 
-      - name: Upload APK
+      - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: SuperMarket-Fawry-APK
-          path: project/app/build/outputs/apk/debug/app-debug.apk
-          if-no-files-found: error
+          path: app/build/outputs/apk/debug/app-debug.apk
