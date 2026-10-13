@@ -15,28 +15,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Find and extract project files
+      - name: Extract Project Zip Automatically
         run: |
-          # 1. فك ضغط الأرشيف الرئيسي
-          ZIP_FILE=$(ls *.zip | head -n 1)
-          echo "Extracting root zip: $ZIP_FILE"
-          unzip -q "$ZIP_FILE" -d root_extracted
-
-          # 2. البحث عن أي ملف zip داخلي وفك ضغطه إن وجد
-          INNER_ZIP=$(find root_extracted -name "*.zip" | head -n 1)
-          if [ -n "$INNER_ZIP" ]; then
-            echo "Extracting inner zip: $INNER_ZIP"
-            unzip -q "$INNER_ZIP" -d inner_extracted
-          fi
-
-          # 3. العثور على المجلد الذي يحتوي على gradlew ونقل المحتويات للمسار الرئيسي
-          GRADLEW_PATH=$(find . -name "gradlew" | head -n 1)
-          PROJECT_DIR=$(dirname "$GRADLEW_PATH")
-          echo "Found project directory at: $PROJECT_DIR"
-          
-          if [ "$PROJECT_DIR" != "." ]; then
-            cp -r $PROJECT_DIR/* ./
-          fi
+          ZIP_NAME=$(find . -maxdepth 1 -name "*.zip" | head -n 1)
+          echo "Found ZIP file: $ZIP_NAME"
+          unzip -q "$ZIP_NAME" -d extracted_project
+          cp -r extracted_project/* ./
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
