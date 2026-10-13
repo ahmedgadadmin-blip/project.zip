@@ -20,6 +20,8 @@ jobs:
           ZIP_NAME=$(find . -maxdepth 1 -name "*.zip" | head -n 1)
           echo "Found ZIP file: $ZIP_NAME"
           unzip -q "$ZIP_NAME" -d extracted_project
+          
+          # نقل محتويات المجلد المستخرج للمسار الرئيسي
           cp -r extracted_project/* ./
 
       - name: Set up JDK 17
@@ -28,14 +30,19 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: Make gradlew executable
-        run: chmod +x gradlew
-
-      - name: Build Debug APK
-        run: ./gradlew assembleDebug
+      - name: Find Project and Build APK
+        run: |
+          # العثور على مكان مجلد المشروع الذي يحتوي على gradlew والانتقال إليه
+          GRADLEW_PATH=$(find . -name "gradlew" | head -n 1)
+          PROJECT_DIR=$(dirname "$GRADLEW_PATH")
+          echo "Project directory is: $PROJECT_DIR"
+          
+          cd "$PROJECT_DIR"
+          chmod +x gradlew
+          ./gradlew assembleDebug
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: SuperMarket-Fawry-APK
-          path: app/build/outputs/apk/debug/app-debug.apk
+          path: '**/build/outputs/apk/debug/app-debug.apk'
